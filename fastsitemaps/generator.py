@@ -2,6 +2,8 @@ from six import StringIO
 from django.utils.xmlutils import SimplerXMLGenerator
 from django.conf import settings
 from fastsitemaps.sitemaps import RequestSitemap
+import os
+
 
 def sitemap_generator(request, maps, page, current_site):
     output = StringIO()
@@ -46,3 +48,12 @@ def sitemap_generator(request, maps, page, current_site):
     last = output.read()
     output.close()
     yield last
+
+
+def file_sitemap_generator(request, maps, filename):
+    tempfilename = os.path.join(settings.MEDIA_ROOT, 'temp_sitemap.xml')
+    with open(tempfilename, 'w') as sitemap_file:
+        for sitemap in maps:
+            sitemap.out_file = sitemap_file
+            sitemap.items_to_file()
+    return True

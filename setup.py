@@ -22,7 +22,7 @@ setup(
     original_author_email="simon@s29.com.au",
     author="Alexandr Kondrashev",
     author_email="vulf@boymail.ru",
-    url="http://github.com/litchfield/django-fastsitemaps",
+    url="http://github.com/AlexLSB/django-fastsitemaps",
     license="MIT License",
     platforms=["any"],
     packages=['fastsitemaps'],

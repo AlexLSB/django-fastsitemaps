@@ -3,7 +3,7 @@ from django.contrib.sitemaps import Sitemap
 class RequestSitemap(Sitemap):
     def __init__(self, request=None):
         self.request = request
-        
+
     def __get(self, name, obj, default=None):
         try:
             attr = getattr(self, name)
@@ -36,3 +36,20 @@ class RequestSitemap(Sitemap):
                 'priority':   str(priority is not None and priority or ''),
             }
             yield url_info
+
+
+class FileSitemap(RequestSitemap):
+
+    def write_to_file(self, location, out_file):
+        url_info = {
+            'loc':   location,
+            'lastmod':    self.__get('lastmod', self, None),
+            'changefreq': self.__get('changefreq', self, None),
+            'priority':   str(self.priority is not None and self.priority or '')}
+        out_file.write("""<url>\
+            <loc>%(loc)s</loc>\
+            <lastmod>%(lastmod)s</lastmod>
+            <changefreq>%(chagefreq)s</changefreq>\
+            <priority>%(priority)s</priority>\
+            <url>\n""" % url_info)
+        return True
