@@ -54,6 +54,6 @@ def file_sitemap_generator(request, maps, filename):
     tempfilename = os.path.join(settings.MEDIA_ROOT, 'temp_sitemap.xml')
     with open(tempfilename, 'w') as sitemap_file:
         for sitemap in maps:
-            sitemap.out_file = sitemap_file
+            sitemap['mark_section'].out_file = sitemap_file
             sitemap.items_to_file()
     return True
