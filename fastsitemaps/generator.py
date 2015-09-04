@@ -2,14 +2,13 @@ from six import StringIO
 from django.utils.xmlutils import SimplerXMLGenerator
 from django.conf import settings
 from fastsitemaps.sitemaps import RequestSitemap
-import os
 
 
 def sitemap_generator(request, maps, page, current_site):
     output = StringIO()
     xml = SimplerXMLGenerator(output, settings.DEFAULT_CHARSET)
     xml.startDocument()
-    xml.startElement('urlset', {'xmlns':'http://www.sitemaps.org/schemas/sitemap/0.9'})
+    xml.startElement('urlset', {'xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9'})
     yield output.getvalue()
     pos = output.tell()
     for site in maps:
@@ -48,12 +47,3 @@ def sitemap_generator(request, maps, page, current_site):
     last = output.read()
     output.close()
     yield last
-
-
-def file_sitemap_generator(request, maps, filename):
-    tempfilename = os.path.join(settings.MEDIA_ROOT, 'temp_sitemap.xml')
-    with open(tempfilename, 'w') as sitemap_file:
-        for sitemap in maps:
-            sitemap['mark_section'].out_file = sitemap_file
-            sitemap.items_to_file()
-    return True

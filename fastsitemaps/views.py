@@ -1,5 +1,4 @@
 from django.core import urlresolvers
-from django.core.paginator import EmptyPage, PageNotAnInteger
 from django.http import Http404, HttpResponse
 from django.template.response import TemplateResponse
 try:
@@ -38,7 +37,7 @@ def index(request, sitemaps, template_name='sitemap_index.xml',
 
 
 def sitemap(request, sitemaps, section=None):
-    maps, urls = [], []
+    maps = []
     if section is not None:
         if section not in sitemaps:
             raise Http404("No sitemap available for section: %r" % section)
