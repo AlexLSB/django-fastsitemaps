@@ -126,7 +126,7 @@ def db_sitemap_to_file(filename):
         return sitemap_part_file
 
     def get_part_url(cntr):
-        return ''.join(('http://detalinadom.com/sitemaps/', '.'.join(('sitemap', str(cntr), 'xml'))))
+        return ''.join((settings.MEDIA_URL, '/sitemaps/', '.'.join(('sitemap', str(cntr), 'xml'))))
 
     def get_partfilename(cntr):
         filename = os.path.join(settings.MEDIA_ROOT,'sitemaps', '.'.join(('sitemap', str(cntr), 'xml')))
