@@ -183,9 +183,9 @@ def quick_db_file_sitemap_generator(request, sitemaps, filename):
 
 
 def db_file_sitemap_generator(request, sitemaps, filename):
-    #if settings.DEBUG:
-        #return slow_db_file_sitemap_generator(request, sitemaps, filename)
-    #else:
+    if settings.DEBUG:
+        return slow_db_file_sitemap_generator(request, sitemaps, filename)
+    else:
         return quick_db_file_sitemap_generator(request, sitemaps, filename)
 
 
@@ -241,7 +241,7 @@ def set_status(status_text):
 
 def generate_sitemap_to_file(request, sitemaps, filename):
     set_status("Запущено обновление sitemap.xml ...")
-    #prepare_db()
+    prepare_db()
     db_file_sitemap_generator(request, sitemaps, filename)
     diff = get_diff()
     set_status('Обновление sitemap.xml завершено.')
