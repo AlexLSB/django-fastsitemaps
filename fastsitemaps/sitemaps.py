@@ -140,7 +140,7 @@ def db_sitemap_to_file(filename):
     itemcnt = 0
     for item in SitemapItem.objects.all().iterator():
         itemcnt += 1
-        if (itemcnt/50000) == 1:
+        if (itemcnt/45000) == 1:
             partscnt += 1
             print partscnt
             itemcnt = 0
