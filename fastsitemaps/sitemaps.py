@@ -106,13 +106,59 @@ def db_sitemap_to_file(filename):
     '''
         Save all urls from SitemapItem table to file specified with filename
     '''
-    tempfilename = os.path.join(settings.MEDIA_ROOT, 'temp_sitemap.xml')
-    with open(tempfilename, 'w') as sitemap_file:
-        sitemap_file.write('''<?xml version="1.0" encoding="utf8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">''')
-        for item in SitemapItem.objects.all().iterator():
-            sitemap_file.write(item.as_xml())
-        sitemap_file.write('''</urlset>''')
-    return move(tempfilename, filename)
+
+    def close_sitemap_part(s_file):
+        s_file.write('''</urlset>''')
+        s_file.close()
+
+    def get_tempfilename(cntr):
+        filename = os.path.join(settings.MEDIA_ROOT, 'sitemaps', '.'.join(('temp_sitemap', str(cntr), 'xml')))
+        if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
+        return filename
+
+    def new_sitemap_part(s_file, cntr):
+        if s_file is not None:
+            close_sitemap_part(s_file)
+        tempfilename = get_tempfilename(partscnt)
+        sitemap_part_file = open(tempfilename, 'w')
+        sitemap_part_file.write('''<?xml version="1.0" encoding="utf8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">''')
+        return sitemap_part_file
+
+    def get_part_url(cntr):
+        return ''.join(('http://detalinadom.com/sitemaps/', '.'.join(('sitemap', str(cntr), 'xml'))))
+
+    def get_partfilename(cntr):
+        filename = os.path.join(settings.MEDIA_ROOT,'sitemaps', '.'.join(('sitemap', str(cntr), 'xml')))
+        if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
+        return filename
+
+    partscnt = 1
+    sitemap_part_file = new_sitemap_part(None, partscnt)
+    print partscnt
+    itemcnt = 0
+    for item in SitemapItem.objects.all().iterator():
+        itemcnt += 1
+        if (itemcnt/50000) == 1:
+            partscnt += 1
+            print partscnt
+            itemcnt = 0
+            sitemap_part_file = new_sitemap_part(sitemap_part_file, partscnt)
+        sitemap_part_file.write(item.as_xml())
+    close_sitemap_part(sitemap_part_file)
+    for p in range(1, partscnt+1):
+        print p, 'copy'
+        tempfilename = get_tempfilename(p)
+        partfilename = get_partfilename(p)
+        move(tempfilename, partfilename)
+
+    with open(filename, 'w') as sitemaphead:
+        sitemaphead.write('''<?xml version="1.0" encoding="utf8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">''')
+        for p in range(1, partscnt):
+            sitemaphead.write("<sitemap><loc>%s</loc></sitemap>" % get_part_url(p))
+        sitemaphead.write('</sitemapindex>')
+    return True
 
 
 @transaction.commit_on_success
@@ -137,9 +183,9 @@ def quick_db_file_sitemap_generator(request, sitemaps, filename):
 
 
 def db_file_sitemap_generator(request, sitemaps, filename):
-    if settings.DEBUG:
-        return slow_db_file_sitemap_generator(request, sitemaps, filename)
-    else:
+    #if settings.DEBUG:
+        #return slow_db_file_sitemap_generator(request, sitemaps, filename)
+    #else:
         return quick_db_file_sitemap_generator(request, sitemaps, filename)
 
 
@@ -195,7 +241,7 @@ def set_status(status_text):
 
 def generate_sitemap_to_file(request, sitemaps, filename):
     set_status("Запущено обновление sitemap.xml ...")
-    prepare_db()
+    #prepare_db()
     db_file_sitemap_generator(request, sitemaps, filename)
     diff = get_diff()
     set_status('Обновление sitemap.xml завершено.')
