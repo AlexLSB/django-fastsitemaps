@@ -155,7 +155,7 @@ def db_sitemap_to_file(filename):
 
     with open(filename, 'w') as sitemaphead:
         sitemaphead.write('''<?xml version="1.0" encoding="utf8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">''')
-        for p in range(1, partscnt):
+        for p in range(1, partscnt+1):
             sitemaphead.write("<sitemap><loc>%s</loc></sitemap>" % get_part_url(p))
         sitemaphead.write('</sitemapindex>')
     return True
