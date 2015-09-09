@@ -136,7 +136,7 @@ def db_sitemap_to_file(filename):
 
     if settings.SITEMAP_PART_MAXITEMS:
         maxitems = settings.SITEMAP_PART_MAXITEMS
-    else
+    else:
         maxitems = 10000
     partscnt = 1
     sitemap_part_file = new_sitemap_part(None, partscnt)
