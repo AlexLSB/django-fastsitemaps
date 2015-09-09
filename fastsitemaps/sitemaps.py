@@ -134,13 +134,17 @@ def db_sitemap_to_file(filename):
             os.makedirs(os.path.dirname(filename))
         return filename
 
+    if settings.SITEMAP_PART_MAXITEMS:
+        maxitems = settings.SITEMAP_PART_MAXITEMS
+    else
+        maxitems = 10000
     partscnt = 1
     sitemap_part_file = new_sitemap_part(None, partscnt)
     print partscnt
     itemcnt = 0
     for item in SitemapItem.objects.all().iterator():
         itemcnt += 1
-        if (itemcnt/45000) == 1:
+        if (itemcnt/maxitems) == 1:
             partscnt += 1
             print partscnt
             itemcnt = 0
