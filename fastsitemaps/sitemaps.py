@@ -134,25 +134,34 @@ def db_sitemap_to_file(filename):
             os.makedirs(os.path.dirname(filename))
         return filename
 
-    if settings.SITEMAP_PART_MAXITEMS:
-        maxitems = settings.SITEMAP_PART_MAXITEMS
+    if SITEMAP_PART_MAXITEMS in settings:
+        all_parts_maxitems = settings.SITEMAP_PART_MAXITEMS
     else:
-        maxitems = 10000
+        all_parts_maxitems = 50000
+
+    if SITEMAP_PART_MAXITEMS in settings:
+        first_part_maxitems = settings.SITEMAP_PART_MAXITEMS
+    else:
+        first_part_maxitems = 4000
+
+    maxitems = first_part_maxitems
     partscnt = 1
     sitemap_part_file = new_sitemap_part(None, partscnt)
+    first_part = True
     print partscnt
     itemcnt = 0
     for item in SitemapItem.objects.all().iterator():
         itemcnt += 1
         if (itemcnt/maxitems) == 1:
             partscnt += 1
-            print partscnt
+            if first_part:
+                first_part = False
+                maxitems = all_parts_maxitems
             itemcnt = 0
             sitemap_part_file = new_sitemap_part(sitemap_part_file, partscnt)
         sitemap_part_file.write(item.as_xml())
     close_sitemap_part(sitemap_part_file)
     for p in range(1, partscnt+1):
-        print p, 'copy'
         tempfilename = get_tempfilename(p)
         partfilename = get_partfilename(p)
         move(tempfilename, partfilename)
