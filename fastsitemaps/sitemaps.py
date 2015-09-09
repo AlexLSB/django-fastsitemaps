@@ -134,13 +134,13 @@ def db_sitemap_to_file(filename):
             os.makedirs(os.path.dirname(filename))
         return filename
 
-    if SITEMAP_PART_MAXITEMS in settings:
+    if hasattr(settings, 'SITEMAP_PART_MAXITEMS'):
         all_parts_maxitems = settings.SITEMAP_PART_MAXITEMS
     else:
         all_parts_maxitems = 50000
 
-    if SITEMAP_PART_MAXITEMS in settings:
-        first_part_maxitems = settings.SITEMAP_PART_MAXITEMS
+    if hasattr(settings, 'SITEMAP_FIRST_PART_MAXITEMS'):
+        first_part_maxitems = settings.SITEMAP_FIRST_PART_MAXITEMS
     else:
         first_part_maxitems = 4000
 
