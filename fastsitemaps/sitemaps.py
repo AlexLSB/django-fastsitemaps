@@ -175,7 +175,7 @@ def db_sitemap_to_file(filename):
 
 
 @transaction.commit_on_success
-def quick_db_file_sitemap_generator(request, sitemaps, filename):
+def quick_db_file_sitemap_generator(sitemaps, filename):
     stmp_cnt = 0
     stmp_len = len(sitemaps)
     for key, SitemapClass in sitemaps.iteritems():
@@ -195,11 +195,11 @@ def quick_db_file_sitemap_generator(request, sitemaps, filename):
     return db_sitemap_to_file(filename)
 
 
-def db_file_sitemap_generator(request, sitemaps, filename):
+def db_file_sitemap_generator(sitemaps, filename):
     if settings.DEBUG:
-        return slow_db_file_sitemap_generator(request, sitemaps, filename)
+        return slow_db_file_sitemap_generator(sitemaps, filename)
     else:
-        return quick_db_file_sitemap_generator(request, sitemaps, filename)
+        return quick_db_file_sitemap_generator(sitemaps, filename)
 
 
 def to_xml(item):
@@ -211,7 +211,7 @@ def to_xml(item):
 </url>\n""" % {'url': item['url'],  'lastmod': item['lastmod'], 'changefreq': item['changefreq'], 'priority': item['priority']}
 
 
-def slow_db_file_sitemap_generator(request, sitemaps, filename):
+def slow_db_file_sitemap_generator(sitemaps, filename):
     stmp_cnt = 0
     stmp_len = len(sitemaps)
     tempfilename = os.path.join(settings.MEDIA_ROOT, 'temp_sitemap.xml')
@@ -252,10 +252,10 @@ def set_status(status_text):
         s = Status.objects.create(status="Запущено обновление sitemap.xml ...")
 
 
-def generate_sitemap_to_file(request, sitemaps, filename):
+def generate_sitemap_to_file(sitemaps, filename):
     set_status("Запущено обновление sitemap.xml ...")
     prepare_db()
-    db_file_sitemap_generator(request, sitemaps, filename)
+    db_file_sitemap_generator(sitemaps, filename)
     diff = get_diff()
     set_status('Обновление sitemap.xml завершено.')
     return diff
