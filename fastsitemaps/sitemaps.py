@@ -148,7 +148,6 @@ def db_sitemap_to_file(filename):
     partscnt = 1
     sitemap_part_file = new_sitemap_part(None, partscnt)
     first_part = True
-    print partscnt
     itemcnt = 0
     for item in SitemapItem.objects.all().iterator():
         itemcnt += 1
@@ -183,7 +182,6 @@ def quick_db_file_sitemap_generator(sitemaps, filename):
         transcounter = 0
         stmp_cnt += 1
         set_status('%s (%d/%d)' % (key, stmp_cnt, stmp_len))
-        print key
         for item in sitemap.items_iterator():
             sm_item = SitemapItem(**item)
             sm_item.save()
@@ -221,7 +219,6 @@ def slow_db_file_sitemap_generator(sitemaps, filename):
             sitemap = SitemapClass()
             stmp_cnt += 1
             set_status('%s (%d/%d)' % (key, stmp_cnt, stmp_len))
-            print key
             for item in sitemap.items_iterator():
                 sitemap_file.write(to_xml(item))
             gc.collect()
