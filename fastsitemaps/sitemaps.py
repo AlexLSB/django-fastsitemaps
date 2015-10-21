@@ -64,10 +64,25 @@ class FileSitemap(RequestSitemap):
             'changefreq': changefreq,
             'priority':   str(priority is not None and priority or '')}
 
+    def get_csv_info(self, location, lastmod, category, title, site=None):
+        site = self.get_site(site)
+        if not location.startswith('http'):
+                location = "http://%s%s" % (site.domain, location)
+        return {
+            'url':   location,
+            'lastmod':    lastmod.strftime('%Y-%m-%d'),
+            'changefreq': '',
+            'priority':   '',
+            'category': category,
+            'title': title}
 
-def prepare_db():
+
+def prepare_db(csv=False):
     cursor = connection.cursor()
-    cursor.execute('''TRUNCATE TABLE fastsitemaps_oldsitemapitem;
+    if csv:
+        cursor.execute('''TRUNCATE TABLE fastsitemaps_csvitem;''')
+    else:
+        cursor.execute('''TRUNCATE TABLE fastsitemaps_oldsitemapitem;
         INSERT INTO fastsitemaps_oldsitemapitem
 SELECT *
 FROM fastsitemaps_sitemapitem;
@@ -151,7 +166,7 @@ def db_sitemap_to_file(filename):
     itemcnt = 0
     for item in SitemapItem.objects.all().iterator():
         itemcnt += 1
-        if (itemcnt/maxitems) == 1:
+        if itemcnt == maxitems:
             partscnt += 1
             if first_part:
                 first_part = False
@@ -173,6 +188,9 @@ def db_sitemap_to_file(filename):
     return True
 
 
+
+
+
 @transaction.commit_on_success
 def quick_db_file_sitemap_generator(sitemaps, filename):
     stmp_cnt = 0
@@ -191,6 +209,8 @@ def quick_db_file_sitemap_generator(sitemaps, filename):
                 transcounter = 0
         gc.collect()
     return db_sitemap_to_file(filename)
+
+
 
 
 def db_file_sitemap_generator(sitemaps, filename):
@@ -256,3 +276,61 @@ def generate_sitemap_to_file(sitemaps, filename):
     diff = get_diff()
     set_status('Обновление sitemap.xml завершено.')
     return diff
+
+
+'''
+=============================================================
+
+    Генерация csv_map
+
+=============================================================
+'''
+
+
+@transaction.commit_on_success
+def quick_db_file_csv_generator(csv_sitemaps, filename):
+    '''
+        генерация csv_item для сайтмапов csv_sitemaps в
+        базу (в модель CsvItem)
+    '''
+    stmp_cnt = 0
+    stmp_len = len(csv_sitemaps)
+    for key, SitemapClass in csv_sitemaps.iteritems():
+        print csv_sitemaps
+        sitemap = SitemapClass()
+        transcounter = 0
+        stmp_cnt += 1
+        set_status('%s (%d/%d)' % (key, stmp_cnt, stmp_len))
+        for item in sitemap.items_iterator(csv=True, category=key):
+            sm_item = CsvItem(**item)
+            sm_item.save()
+            transcounter += 1
+            if (transcounter == 1000):
+                transaction.commit()
+                transcounter = 0
+        gc.collect()
+    return True
+
+
+def db_sitemap_to_csv(filename):
+    '''
+        Запись сгенерированных в базу данных csv_item в файл csv
+    '''
+    with open(filename, 'w') as csvfile:
+        csvfile.write("""url;lastmod;category;title;\n""")
+        for item in CsvItem.objects.all().iterator():
+            csvfile.write(item.as_csv())
+    return True
+
+
+def generate_csv_to_file(csv_sitemaps, filename):
+    '''
+        Простановка статусов, подготовка ДБ и запуск генерации csv,
+        а затем запуск сохранения их в filename
+    '''
+    set_status("Запущено обновление csv_map.csv ...")
+    prepare_db(csv=True)
+    quick_db_file_csv_generator(csv_sitemaps, filename)
+    db_sitemap_to_csv(filename)
+    set_status('Обновление csv_map.csv завершено.')
+    return True
